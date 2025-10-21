@@ -45,6 +45,8 @@ type FooStatus struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// Conventional, used for client get, watch multi resource
+
 // FooList is a list of Foo resources
 type FooList struct {
 	metav1.TypeMeta `json:",inline"`
