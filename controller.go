@@ -176,7 +176,10 @@ func (c *Controller) Run(ctx context.Context, workers int) error {
 
 	logger.Info("Starting workers", "count", workers)
 	// Launch two workers to process Foo resources
+	// Worker depends on resource
 	for i := 0; i < workers; i++ {
+		// Loop, if a worker quit unusually, start a new worker
+		// runWorker is the actual reconciliation loop
 		go wait.UntilWithContext(ctx, c.runWorker, time.Second)
 	}
 
@@ -198,6 +201,7 @@ func (c *Controller) runWorker(ctx context.Context) {
 // processNextWorkItem will read a single work item off the workqueue and
 // attempt to process it, by calling the syncHandler.
 func (c *Controller) processNextWorkItem(ctx context.Context) bool {
+	// Get blocks until it can return(pop) an item to be processed.
 	objRef, shutdown := c.workqueue.Get()
 	logger := klog.FromContext(ctx)
 
