@@ -301,6 +301,11 @@ func (c *Controller) syncHandler(ctx context.Context, objectRef cache.ObjectName
 		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(ctx, newDeployment(foo), metav1.UpdateOptions{FieldManager: FieldManager})
 	}
 
+	if foo.Spec.Image != "" && foo.Spec.Image != deployment.Spec.Template.Spec.Containers[0].Image {
+		logger.V(4).Info("Update deployment resource", "currentImage", deployment.Spec.Template.Spec.Containers[0].Image, "desiredImage", foo.Spec.Image)
+		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(ctx, newDeployment(foo), metav1.UpdateOptions{FieldManager: FieldManager})
+	}
+
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. This could have been caused by a
 	// temporary network failure, or any other transient reason.
@@ -419,7 +424,7 @@ func newDeployment(foo *samplev1alpha1.Foo) *appsv1.Deployment {
 					Containers: []corev1.Container{
 						{
 							Name:  "nginx",
-							Image: "nginx:latest",
+							Image: foo.Spec.Image,
 						},
 					},
 				},
